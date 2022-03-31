@@ -5,12 +5,43 @@ template-editor.aPanel.aView.flexrow
                 asset-input.wide(
                     assettype="textures"
                     assetid="{template.texture || -1}"
-                    large="yup"
-                    allowclear="da"
+                    large="large"
+                    allowclear="allowclear"
                     onchanged="{applyTexture}"
                 )
-            .flexfix-body
                 .aSpacer
+            .flexfix-body
+                event-list-scriptable(
+                    events="{template.events}"
+                    entitytype="template"
+                    onchanged="{changeCodeTab}"
+                    currentevent="{currentSheet}"
+                ).tall
+            .flexfix-footer
+                .aSpacer
+                button#templatedone.wide(onclick="{templateSave}" title="Shift+Control+S" data-hotkey="Control+S")
+                    svg.feather
+                        use(xlink:href="#check")
+                    span {voc.done}
+    .template-editor-aCodeEditor
+        .tabwrap.tall(style="position: relative")
+            //ul.tabs.aNav.nogrow.noshrink
+            //    li(onclick="{changeTab('javascript')}" class="{active: tab === 'javascript'}" title="JavaScript (Control+Q)" data-hotkey="Control+q")
+            //        svg.feather
+            //            use(xlink:href="#code")
+            //        span {voc.create}
+            //    li(onclick="{changeTab('blocks')}" class="{active: tab === 'blocks'}" title="Blurry (Control+W)" data-hotkey="Control+w")
+            //        svg.feather
+            //            use(xlink:href="#grid")
+            //        span {voc.step}
+            div
+                .tabbed(show="{tab === 'javascript'}")
+                    .aCodeEditor(ref="javascript")
+                .tabbed(show="{tab === 'blocks'}")
+                    .aBlocksEditor(ref="blocks")
+    .template-editor-Properties
+        .tall.flexfix.aPanel.pad
+            .flexfix-body
                 fieldset
                     label.block
                         b {voc.name}
@@ -50,43 +81,8 @@ template-editor.aPanel.aView.flexrow
                         label.block.checkbox
                             input(type="checkbox" checked="{parent.template.extends.visible ?? true}" onchange="{parent.wire('this.template.extends.visible')}")
                             span {parent.voc.visible}
+                .aSpacer
                 extensions-editor(type="template" entity="{template.extends}" wide="yep" compact="probably")
-                br
-                br
-                docs-shortcut(path="/ct.templates.html" button="true" wide="true" title="{voc.learnAboutTemplates}")
-            .flexfix-footer
-                button#templatedone.wide(onclick="{templateSave}" title="Shift+Control+S" data-hotkey="Control+S")
-                    svg.feather
-                        use(xlink:href="#check")
-                    span {voc.done}
-    .template-editor-aCodeEditor
-        .tabwrap.tall(style="position: relative")
-            ul.tabs.aNav.nogrow.noshrink
-                li(onclick="{changeTab('templateoncreate')}" class="{active: tab === 'templateoncreate'}" title="{voc.create} (Control+Q)" data-hotkey="Control+q")
-                    svg.feather
-                        use(xlink:href="#sun")
-                    span {voc.create}
-                li(onclick="{changeTab('templateonstep')}" class="{active: tab === 'templateonstep'}" title="{voc.step} (Control+W)" data-hotkey="Control+w")
-                    svg.feather
-                        use(xlink:href="#skip-forward")
-                    span {voc.step}
-                li(onclick="{changeTab('templateondraw')}" class="{active: tab === 'templateondraw'}" title="{voc.draw} (Control+E)" data-hotkey="Control+e")
-                    svg.feather
-                        use(xlink:href="#edit-2")
-                    span {voc.draw}
-                li(onclick="{changeTab('templateondestroy')}" class="{active: tab === 'templateondestroy'}" title="{voc.destroy} (Control+R)" data-hotkey="Control+r")
-                    svg.feather
-                        use(xlink:href="#trash")
-                    span {voc.destroy}
-            div
-                #templateoncreate.tabbed(show="{tab === 'templateoncreate'}")
-                    .aCodeEditor(ref="templateoncreate")
-                #templateonstep.tabbed(show="{tab === 'templateonstep'}")
-                    .aCodeEditor(ref="templateonstep")
-                #templateondraw.tabbed(show="{tab === 'templateondraw'}")
-                    .aCodeEditor(ref="templateondraw")
-                #templateondestroy.tabbed(show="{tab === 'templateondestroy'}")
-                    .aCodeEditor(ref="templateondestroy")
     script.
         const glob = require('./data/node_requires/glob');
         this.glob = glob;
@@ -99,34 +95,22 @@ template-editor.aPanel.aView.flexrow
         this.getTextureRevision = template => textures.getById(template.texture).lastmod;
 
         this.template = this.opts.template;
-        this.tab = 'templateoncreate';
-
-        const tabToEditor = tab => {
-            tab = tab || this.tab;
-            if (tab === 'templateonstep') {
-                return this.templateonstep;
-            } else if (tab === 'templateondraw') {
-                return this.templateondraw;
-            } else if (tab === 'templateondestroy') {
-                return this.templateondestroy;
-            } else if (tab === 'templateoncreate') {
-                return this.templateoncreate;
-            }
-            return null;
-        };
+        this.tab = 'javascript';
+        this.currentSheet = this.template.events[0]; // can be undefined, this is ok
 
         this.changeTab = tab => () => {
             this.tab = tab;
-            const editor = tabToEditor(tab);
-            setTimeout(() => {
-                editor.layout();
-                editor.focus();
-            }, 0);
+            if (this.tab === 'javascript') {
+                setTimeout(() => {
+                    this.codeEditor.layout();
+                    this.codeEditor.focus();
+                }, 0);
+            }
         };
 
         const updateEditorSize = () => {
-            if (tabToEditor()) {
-                tabToEditor().layout();
+            if (this.tab === 'javascript') {
+                this.codeEditor.layout();
             }
         };
         const updateEditorSizeDeferred = function () {
@@ -147,48 +131,18 @@ template-editor.aPanel.aView.flexrow
                 lockWrapper: true
             };
             setTimeout(() => {
-                this.templateoncreate = window.setupCodeEditor(
-                    this.refs.templateoncreate,
+                this.codeEditor = window.setupCodeEditor(
+                    this.refs.javascript,
                     Object.assign({}, editorOptions, {
-                        value: this.template.oncreate,
+                        value: '',
                         wrapper: ['function onCreate(this: Copy) {', '}']
                     })
                 );
-                this.templateonstep = window.setupCodeEditor(
-                    this.refs.templateonstep,
-                    Object.assign({}, editorOptions, {
-                        value: this.template.onstep,
-                        wrapper: ['function onStep(this: Copy) {', '}']
-                    })
-                );
-                this.templateondraw = window.setupCodeEditor(
-                    this.refs.templateondraw,
-                    Object.assign({}, editorOptions, {
-                        value: this.template.ondraw,
-                        wrapper: ['function onDraw(this: Copy) {', '}']
-                    })
-                );
-                this.templateondestroy = window.setupCodeEditor(
-                    this.refs.templateondestroy,
-                    Object.assign({}, editorOptions, {
-                        value: this.template.ondestroy,
-                        wrapper: ['function onDestroy(this: Copy) {', '}']
-                    })
-                );
 
-                this.templateoncreate.onDidChangeModelContent(() => {
-                    this.template.oncreate = this.templateoncreate.getPureValue();
+                this.codeEditor.onDidChangeModelContent(() => {
+                    this.currentEvent.code = this.codeEditor.getPureValue();
                 });
-                this.templateonstep.onDidChangeModelContent(() => {
-                    this.template.onstep = this.templateonstep.getPureValue();
-                });
-                this.templateondraw.onDidChangeModelContent(() => {
-                    this.template.ondraw = this.templateondraw.getPureValue();
-                });
-                this.templateondestroy.onDidChangeModelContent(() => {
-                    this.template.ondestroy = this.templateondestroy.getPureValue();
-                });
-                this.templateoncreate.focus();
+                this.codeEditor.focus();
             }, 0);
         });
         this.checkNames = () => {
@@ -204,10 +158,7 @@ template-editor.aPanel.aView.flexrow
         });
         this.on('unmount', () => {
             // Manually destroy code editors, to free memory
-            this.templateoncreate.dispose();
-            this.templateonstep.dispose();
-            this.templateondraw.dispose();
-            this.templateondestroy.dispose();
+            this.codeEditors.dispose();
         });
 
         this.changeSprite = () => {
@@ -249,4 +200,7 @@ template-editor.aPanel.aView.flexrow
             this.parent.update();
             window.signals.trigger('templatesChanged');
             return true;
+        };
+        this.changeCodeTab = scriptableEvent => {
+            this.currentSheet = scriptableEvent;
         };

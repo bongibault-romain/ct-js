@@ -10,7 +10,8 @@ const defaultTemplate = {
     ondestroy: '',
     texture: -1 as assetRef,
     visible: true,
-    extends: {}
+    extends: {},
+    events: [] as IScriptableEvent[]
 };
 
 module.exports = {

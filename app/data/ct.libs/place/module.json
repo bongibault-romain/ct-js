@@ -67,5 +67,51 @@
         "collect": true,
         "collectScope": "place::cgroup",
         "key": "cgroup"
-    }]
+    }],
+    "eventCategories": {
+        "collisions": {
+            "name": "Collisions",
+            "icon": "copy"
+        }
+    },
+    "events": {
+        "collisionTemplate": {
+            "name": "Collision with a template",
+            "nameFilled": "Collision with $template template",
+            "applicable": ["template"],
+            "category": {
+                "custom": true,
+                "name": "collisions"
+            },
+            "arguments": {
+                "template": {
+                    "name": "Template",
+                    "type": "template"
+                }
+            },
+            "codeTargets": ["thisOnStep"],
+            "locals": {
+                "other": "Copy"
+            }
+        },
+        "collisionCGroup": {
+            "name": "Collision with a group",
+            "nameFilled": "Collision with $group group",
+            "applicable": ["template"],
+            "category": {
+                "custom": true,
+                "name": "collisions"
+            },
+            "arguments": {
+                "group": {
+                    "name": "Group",
+                    "type": "string"
+                }
+            },
+            "codeTargets": ["thisOnStep"],
+            "locals": {
+                "other": "Copy"
+            }
+        }
+    }
 }

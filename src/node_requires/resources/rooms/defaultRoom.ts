@@ -22,6 +22,7 @@ const get = function (): IRoom {
         extends: {},
         lastmod: Number(new Date()),
         thumbnail: uid,
+        events: [],
         uid
     });
     return newRoom;

@@ -125,6 +125,19 @@
                 "skeletal sprites",
                 "skeletal sprites"
             ]
+        },
+        "scriptables": {
+            "addEvent": "Add an event",
+            "removeEvent": "Remove the event",
+            "changeArguments": "Change arguments",
+            "coreEvents": {
+                "core_OnCreate": "On Creation",
+                "core_OnRoomStart": "On Room Start",
+                "core_OnStep": "On Step",
+                "core_OnDraw": "On Draw",
+                "core_OnDestroy": "On Destruction",
+                "core_OnRoomEnd": "On Room End"
+            }
         }
     },
     "assetInput": {

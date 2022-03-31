@@ -277,8 +277,9 @@
         const opts = extend(extend({}, defaultOptions), options);
         opts.value = opts.value || textarea.value || '';
         opts.value = opts.value.replace(/\r\n/g, '\n');
+        let [wrapStart, wrapEnd] = opts.wrapper;
         if (opts.wrapper) {
-            opts.value = `${opts.wrapper[0]}\n${opts.value}\n${opts.wrapper[1]}`;
+            opts.value = `${wrapStart}\n${opts.value}\n${wrapEnd}`;
             opts.lineNumbers = num => Math.max((num || 0) - 1, 1);
         }
         const codeEditor = monaco.editor.create(textarea, opts);
@@ -291,8 +292,8 @@
 
         codeEditor.getPureValue = function getPureValue() {
             const val = this.getValue();
-            const start = opts.wrapper[0] + '\n',
-                  end = '\n' + opts.wrapper[1];
+            const start = wrapStart + '\n',
+                  end = '\n' + wrapEnd;
             if (options.wrapper) {
                 if (val.indexOf(start) === 0 &&
                     val.lastIndexOf(end) === (val.length - end.length)
@@ -301,6 +302,18 @@
                 }
             }
             return val;
+        };
+        codeEditor.setWrapperCode = function setWrapperCode(start, end) {
+            const oldVal = this.getValue();
+            wrapStart = start;
+            wrapEnd = end;
+            if (options.wrapper) {
+                if (oldVal.indexOf(start) === 0 &&
+                    oldVal.lastIndexOf(end) === (oldVal.length - end.length)
+                ) {
+                    this.setValue(`${wrapStart}\n${oldVal.slice((start).length, -end.length)}\n${wrapEnd}`);
+                }
+            }
         };
 
         if (opts.lockWrapper) {

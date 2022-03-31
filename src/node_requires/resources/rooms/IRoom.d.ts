@@ -34,7 +34,7 @@ interface ITileLayerTemplate {
     tiles: Array<ITileTemplate>
 }
 
-interface IRoom extends IAsset {
+interface IRoom extends IScriptable {
     // Currently just stick to the old structure
     width: number,
     height: number,
@@ -43,10 +43,6 @@ interface IRoom extends IAsset {
     tiles: Array<ITileLayerTemplate>
     gridX: number,
     gridY: number,
-    oncreate: string,
-    onstep: string,
-    ondraw: string,
-    onleave: string,
     thumbnail: string,
     extends: {
         [key: string]: unknown
