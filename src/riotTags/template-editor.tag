@@ -36,9 +36,9 @@ template-editor.aPanel.aView.flexrow
             //        span {voc.step}
             div
                 .tabbed(show="{tab === 'javascript'}")
-                    .aCodeEditor(ref="javascript")
-                .tabbed(show="{tab === 'blocks'}")
-                    .aBlocksEditor(ref="blocks")
+                    code-editor-scriptable(event="{currentSheet}" entitytype="template")
+                // .tabbed(show="{tab === 'blocks'}")
+                //     .aBlocksEditor(ref="blocks")
     .template-editor-Properties
         .tall.flexfix.aPanel.pad
             .flexfix-body
@@ -155,10 +155,6 @@ template-editor.aPanel.aView.flexrow
         };
         this.on('update', () => {
             this.checkNames();
-        });
-        this.on('unmount', () => {
-            // Manually destroy code editors, to free memory
-            this.codeEditors.dispose();
         });
 
         this.changeSprite = () => {

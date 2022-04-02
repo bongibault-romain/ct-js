@@ -63,8 +63,12 @@ const bakeCategories = function bakeCategories(entity: EventApplicableEntities):
     return menu;
 };
 
+const getEventByLib = (event: string, libName: string): IEventDeclaration =>
+    events[`${libName}_${event}`];
+
 export = {
     coreCategories,
     events,
-    bakeCategories
+    bakeCategories,
+    getEventByLib
 };
