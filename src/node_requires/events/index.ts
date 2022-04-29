@@ -63,12 +63,38 @@ const bakeCategories = function bakeCategories(entity: EventApplicableEntities):
     return menu;
 };
 
+const ctTypeToTSTypeMap = {
+    integer: 'number',
+    float: 'number',
+    string: 'string',
+    boolean: 'boolean',
+    template: 'string | -1',
+    room: 'string | -1',
+    sound: 'string | -1',
+    tandem: 'string | -1',
+    font: 'string | -1',
+    style: 'string | -1',
+    texture: 'string | -1',
+    action: 'Action'
+};
+
 const getEventByLib = (event: string, libName: string): IEventDeclaration =>
     events[`${libName}_${event}`];
+
+const getArgumentsTypeScript = (event: IEventDeclaration): string => {
+    let code = '';
+    if (event.arguments) {
+        for (const key in event.arguments) {
+            code += `var ${key}: ${ctTypeToTSTypeMap[event.arguments[key].type]} = ${event.arguments[key].default || 'void 0'};`;
+        }
+    }
+    return code;
+};
 
 export = {
     coreCategories,
     events,
     bakeCategories,
-    getEventByLib
+    getEventByLib,
+    getArgumentsTypeScript
 };

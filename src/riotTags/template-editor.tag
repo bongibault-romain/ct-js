@@ -100,30 +100,7 @@ template-editor.aPanel.aView.flexrow
 
         this.changeTab = tab => () => {
             this.tab = tab;
-            if (this.tab === 'javascript') {
-                setTimeout(() => {
-                    this.codeEditor.layout();
-                    this.codeEditor.focus();
-                }, 0);
-            }
         };
-
-        const updateEditorSize = () => {
-            if (this.tab === 'javascript') {
-                this.codeEditor.layout();
-            }
-        };
-        const updateEditorSizeDeferred = function () {
-            setTimeout(updateEditorSize, 0);
-        };
-        window.signals.on('templatesFocus', this.focusEditor);
-        window.signals.on('templatesFocus', updateEditorSizeDeferred);
-        window.addEventListener('resize', updateEditorSize);
-        this.on('unmount', () => {
-            window.signals.off('templatesFocus', this.focusEditor);
-            window.signals.off('templatesFocus', updateEditorSizeDeferred);
-            window.removeEventListener('resize', updateEditorSize);
-        });
 
         this.on('mount', () => {
             var editorOptions = {
@@ -198,5 +175,7 @@ template-editor.aPanel.aView.flexrow
             return true;
         };
         this.changeCodeTab = scriptableEvent => {
+            console.log(scriptableEvent);
             this.currentSheet = scriptableEvent;
+            this.update();
         };
